@@ -2,8 +2,8 @@
 
 Find Prime Numbers.
 
-This tool have the functionality to find prime numbers in matrices, the limits
-of these matrices must be between 0 to 99999999 lines/columns.
+This tool have the functionality to find prime numbers in matrices, the size
+of these elements in matrix must be between 0 to 99999999.
 
 ---
 
