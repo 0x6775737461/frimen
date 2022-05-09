@@ -5,6 +5,10 @@
 #define MAX_SIZE 100
 #define size_int sizeof(int)
 
+#define YLW "\e[0;33m"
+#define RED "\e[0;31m"
+#define CLR "\e[0m"
+
 #define valid_num \
     ((rand())%(MAX_SIZE))
 
@@ -18,8 +22,8 @@ int main(void) {
 
     int lines, cols;
 
-    lines = 5;
-    cols = 5;
+    lines = 10;
+    cols = 10;
 
     // we don't use the stack (matrix[L][C])
     // because its size limit is ~= 8KiB
@@ -27,16 +31,8 @@ int main(void) {
 
     fill_matrix(matrix, lines, cols);
 
-    for(int i = 0; i < lines; i++) {
-        for(int j = 0; j < cols; j++) {
-            printf("(%3x) ", matrix + (i + j) + 1);
-            printf("(%2d)", offset(i, j, cols));
-
-            printf("[%8d] ", matrix[offset(i, j, cols)]);
-            //if(j + 1 == cols)
-                puts("");
-        }
-    }
+    // just to view the slice in the matrix
+    red_color(matrix, lines, cols);
 
     free(matrix);
 
@@ -47,6 +43,7 @@ int *alloc_matrix(int lines, int cols) {
     // in this arch (amd64), 1 int holds 4 bytes of data
     // 4 bytes == 32 bits, but we need just 27 bits
     // 2**(27) == 134.217.728 > 99.999.999
+    
     int *matrix = malloc(lines * cols * sizeof(int));
 
     if(!matrix) {
@@ -61,7 +58,7 @@ void fill_matrix(int *matrix, int lines, int cols) {
     for(int i = 0; i < lines; i++) {
         for(int j = 0; j < cols; j++) {
             matrix[offset(i, j, cols)] = valid_num;
-            printf("[%d]", matrix[offset(i, j, cols)]);
+            //printf("[%d]", matrix[offset(i, j, cols)]);
         }
     }
     puts("");
@@ -78,4 +75,23 @@ int offset(int line, int col, int t_cols) {
     }
 
     return col + 1;
+}
+
+void red_color(int *matrix, int lines, int cols) {
+    int last_addr = (lines * cols) / 2;
+
+    for(int i = 0; i < lines; i++) {
+        for(int j = 0; j < cols; j++) {
+
+            if(offset(i, j, cols) <= last_addr)
+                printf(RED "(%3d)" CLR, offset(i, j, cols));
+            else
+                printf(YLW "(%3d)" CLR, offset(i, j, cols));
+
+            printf("[%2d] ", matrix[offset(i, j, cols)]);
+            if(j + 1 == cols)
+                puts("");
+        }
+    }
+
 }
