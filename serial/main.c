@@ -16,10 +16,29 @@
 
 #define valid_num ((rand()) % (MAX_SIZE))
 
+// this struct will be used in "colors" and "slice_matrix"
+// functions.
+struct parse_data {
+  int addr;
+  char remainder;
+  char n_times;
+};
+
+// alloc the matrix dynamically
 int *alloc_matrix(int lines, int cols);
+
+// fill the matrix with "random" data
 void fill_matrix(int *matrix, int lines, int cols);
+
+// showing the thread separation with colors
+// in a ficcional matrix
 void colors(int *matrix, int lines, int cols, int threads);
-int slice_matrix(int lines, int cols, int threads);
+
+// get data about address separation, for example
+// the total elements to each thread.
+struct parse_data slice_matrix(int lines, int cols, int threads);
+
+// getting element address
 int offset(int line, int col, int t_cols);
 
 int main(void) {
@@ -27,8 +46,8 @@ int main(void) {
 
   int lines, cols, threads;
 
-  lines = 10;
-  cols = 10;
+  lines = 15;
+  cols = 20;
   threads = 5;
 
   // we don't use the stack (matrix[L][C])
@@ -84,17 +103,23 @@ int offset(int line, int col, int t_cols) {
 }
 
 void colors(int *matrix, int lines, int cols, int threads) {
-  int addr = slice_matrix(lines, cols, threads);
-  int initial_addr = addr;
+
+  struct parse_data slice_data = slice_matrix(lines, cols, threads);
 
   // color id
   int cid = 0;
 
+  // number of color change
+  char n_color_chg = 1;
+
   for (int i = 0; i < lines; i++) {
     for (int j = 0; j < cols; j++) {
-      if (offset(i, j, cols) == addr + 1) {
-        addr += initial_addr;
+
+      if (n_color_chg <= slice_data.n_times &&
+          (offset(i, j, cols) == (slice_data.addr * n_color_chg) + 1)) {
+
         cid++;
+        n_color_chg++;
       }
 
       switch (cid) {
@@ -128,17 +153,32 @@ void colors(int *matrix, int lines, int cols, int threads) {
   }
 }
 
-int slice_matrix(int lines, int cols, int threads) {
+struct parse_data slice_matrix(int lines, int cols, int threads) {
+  // was said in the beginning of the code, this struct should be used
+  // to enter addresses to "balance data" on threads
+  struct parse_data slice_data;
+
+  slice_data.remainder = 0;
+
   int t_elements = lines * cols;
-  int remainder = 0;
+  printf("t_elements: [%5d]\n", t_elements);
 
   if (t_elements % threads) {
     // this values will be inserted on the last thread
-    remainder = t_elements - round(t_elements / threads);
-
-    return remainder;
+    slice_data.remainder = t_elements - (floor(t_elements / threads) * threads);
+    printf("slice_data.remainder: [%5d]", slice_data.remainder);
   }
 
-  // returning the number that is the right multiplier
-  return t_elements / threads;
+  t_elements -= slice_data.remainder;
+  printf("t_elements: [%5d]\n", t_elements);
+
+  // the number that is the right multiplier
+  slice_data.addr = t_elements / threads;
+  printf("slice_data.addr: [%5d]\n", slice_data.addr);
+
+  // getting the times that slice_data.addr must be multiplied
+  slice_data.n_times = t_elements / slice_data.addr;
+  printf("slice_data.n_times: [%5d]\n", slice_data.n_times);
+
+  return slice_data;
 }
