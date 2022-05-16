@@ -12,6 +12,8 @@
 #define YLW "\e[0;33m"
 #define BLU "\e[0;34m"
 #define PRP "\e[0;35m"
+#define CYA "\e[0;36m"
+#define WHT "\e[0;37m"
 #define CLR "\e[0m"
 
 #define valid_num ((rand()) % (MAX_SIZE))
@@ -46,8 +48,8 @@ int main(void) {
 
   int lines, cols, threads;
 
-  lines = 15;
-  cols = 20;
+  lines = 71;
+  cols = 13;
   threads = 5;
 
   // we don't use the stack (matrix[L][C])
@@ -122,29 +124,43 @@ void colors(int *matrix, int lines, int cols, int threads) {
         n_color_chg++;
       }
 
+      // checking if have remainder and if is the last loop
+      if (slice_data.remainder && (n_color_chg == slice_data.n_times + 1)) {
+        cid--;
+        n_color_chg--;
+      }
+
       switch (cid) {
       case 0:
-        printf(RED "[%3d]" CLR, offset(i, j, cols));
+        printf(RED "[%5d]" CLR, offset(i, j, cols));
         break;
 
       case 1:
-        printf(GRE "[%3d]" CLR, offset(i, j, cols));
+        printf(GRE "[%5d]" CLR, offset(i, j, cols));
         break;
 
       case 2:
-        printf(YLW "[%3d]" CLR, offset(i, j, cols));
+        printf(YLW "[%5d]" CLR, offset(i, j, cols));
         break;
 
       case 3:
-        printf(BLU "[%3d]" CLR, offset(i, j, cols));
+        printf(BLU "[%5d]" CLR, offset(i, j, cols));
         break;
 
       case 4:
-        printf(PRP "[%3d]" CLR, offset(i, j, cols));
+        printf(PRP "[%5d]" CLR, offset(i, j, cols));
+        break;
+
+      case 5:
+        printf(CYA "[%5d]" CLR, offset(i, j, cols));
+        break;
+
+      case 6:
+        printf(WHT "[%5d]" CLR, offset(i, j, cols));
         break;
 
       default:
-        printf("[%3d]" CLR, offset(i, j, cols));
+        printf("[%5d]" CLR, offset(i, j, cols));
       }
 
       if (j + 1 == cols)
