@@ -110,8 +110,8 @@ void data_sharing(int *matrix, int lines, int cols, int threads) {
       last_addr += slice_data.addr;
     }
 
-    printf("thread[%d] - [%5d - %5d]\n",
-      i, begin_addr, last_addr);
+    //printf("thread[%d] - [%5d - %5d]\n",
+    //  i, begin_addr, last_addr);
 
     // the plus 1 is just to avoid the threads use
     // the same address
@@ -131,19 +131,20 @@ struct parse_data slice_matrix(int lines, int cols, int threads) {
   if (t_elements % threads) {
     // this values will be inserted on the last thread
     slice_data.remainder = t_elements - (floor(t_elements / threads) * threads);
-    printf("slice_data.remainder: [%5d]", slice_data.remainder);
+
+    //printf("slice_data.remainder: [%5d]", slice_data.remainder);
   }
 
   t_elements -= slice_data.remainder;
-  printf("t_elements: [%5d]\n", t_elements);
+  //printf("t_elements: [%5d]\n", t_elements);
 
   // the number that is the right multiplier
   slice_data.addr = t_elements / threads;
-  printf("slice_data.addr: [%5d]\n", slice_data.addr);
+  //printf("slice_data.addr: [%5d]\n", slice_data.addr);
 
   // getting the times that slice_data.addr must be multiplied
   slice_data.n_times = t_elements / slice_data.addr;
-  printf("slice_data.n_times: [%5d]\n", slice_data.n_times);
+  //printf("slice_data.n_times: [%5d]\n", slice_data.n_times);
 
   return slice_data;
 }
