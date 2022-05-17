@@ -3,18 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#define MAX_SIZE 99999999
-#define MAX_SIZE 100
+#define MAX_SIZE 99999999
 #define size_int sizeof(int)
-
-#define RED "\e[0;31m"
-#define GRE "\e[0;32m"
-#define YLW "\e[0;33m"
-#define BLU "\e[0;34m"
-#define PRP "\e[0;35m"
-#define CYA "\e[0;36m"
-#define WHT "\e[0;37m"
-#define CLR "\e[0m"
 
 #define valid_num ((rand()) % (MAX_SIZE))
 
@@ -32,9 +22,8 @@ int *alloc_matrix(int lines, int cols);
 // fill the matrix with "random" data
 void fill_matrix(int *matrix, int lines, int cols);
 
-// showing the thread separation with colors
-// in a ficcional matrix
-void colors(int *matrix, int lines, int cols, int threads);
+// distribute data addresses between threads
+void data_sharing(int *matrix, int lines, int cols, int threads);
 
 // get data about address separation, for example
 // the total elements to each thread.
@@ -50,7 +39,7 @@ int main(void) {
 
   lines = 71;
   cols = 13;
-  threads = 5;
+  threads = 9;
 
   // we don't use the stack (matrix[L][C])
   // because its size limit is ~= 8KiB
@@ -58,8 +47,8 @@ int main(void) {
 
   fill_matrix(matrix, lines, cols);
 
-  // just to view the slice in the matrix
-  colors(matrix, lines, cols, threads);
+  // seeing the address interval each thread took
+  data_sharing(matrix, lines, cols, threads);
 
   free(matrix);
 
@@ -83,12 +72,10 @@ int *alloc_matrix(int lines, int cols) {
 
 void fill_matrix(int *matrix, int lines, int cols) {
   for (int i = 0; i < lines; i++) {
-    for (int j = 0; j < cols; j++) {
+
+    for (int j = 0; j < cols; j++)
       matrix[offset(i, j, cols)] = valid_num;
-      // printf("[%d]", matrix[offset(i, j, cols)]);
-    }
   }
-  puts("");
 }
 
 // treating the offsets because the matrix
@@ -104,68 +91,31 @@ int offset(int line, int col, int t_cols) {
   return col + 1;
 }
 
-void colors(int *matrix, int lines, int cols, int threads) {
+void data_sharing(int *matrix, int lines, int cols, int threads) {
 
   struct parse_data slice_data = slice_matrix(lines, cols, threads);
 
-  // color id
-  int cid = 0;
+  int begin_addr = 1;
+  int last_addr = 0;
 
-  // number of color change
-  char n_color_chg = 1;
+  for(char i = 1; i <= slice_data.n_times; i++) {
 
-  for (int i = 0; i < lines; i++) {
-    for (int j = 0; j < cols; j++) {
+    // if it is the last "slice" of the matrix
+    if(slice_data.remainder &&
+        i == slice_data.n_times) {
+          last_addr += slice_data.addr;
+          last_addr += slice_data.remainder;
 
-      if (n_color_chg <= slice_data.n_times &&
-          (offset(i, j, cols) == (slice_data.addr * n_color_chg) + 1)) {
-
-        cid++;
-        n_color_chg++;
-      }
-
-      // checking if have remainder and if is the last loop
-      if (slice_data.remainder && (n_color_chg == slice_data.n_times + 1)) {
-        cid--;
-        n_color_chg--;
-      }
-
-      switch (cid) {
-      case 0:
-        printf(RED "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      case 1:
-        printf(GRE "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      case 2:
-        printf(YLW "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      case 3:
-        printf(BLU "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      case 4:
-        printf(PRP "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      case 5:
-        printf(CYA "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      case 6:
-        printf(WHT "[%5d]" CLR, offset(i, j, cols));
-        break;
-
-      default:
-        printf("[%5d]" CLR, offset(i, j, cols));
-      }
-
-      if (j + 1 == cols)
-        puts("");
+    } else {
+      last_addr += slice_data.addr;
     }
+
+    printf("thread[%d] - [%5d - %5d]\n",
+      i, begin_addr, last_addr);
+
+    // the plus 1 is just to avoid the threads use
+    // the same address
+    begin_addr = last_addr + 1;
   }
 }
 
@@ -177,7 +127,6 @@ struct parse_data slice_matrix(int lines, int cols, int threads) {
   slice_data.remainder = 0;
 
   int t_elements = lines * cols;
-  printf("t_elements: [%5d]\n", t_elements);
 
   if (t_elements % threads) {
     // this values will be inserted on the last thread
