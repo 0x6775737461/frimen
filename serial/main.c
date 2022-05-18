@@ -45,8 +45,8 @@ int main(void) {
 
   int lines, cols, threads;
 
-  lines = 71;
-  cols = 13;
+  lines = 80;
+  cols = 80;
   threads = 7;
 
   // indexing the initial/final address of each "slice"
@@ -81,7 +81,7 @@ int main(void) {
   initial_time = clock() - initial_time;
 
   printf("Time Elapsed: [%.2f] min\n",
-    (((double)initial_time) / CLOCKS_PER_SEC) / 60);
+         (((double)initial_time) / CLOCKS_PER_SEC) / 60);
 
   free(matrix);
   free(pair_addr);
@@ -165,7 +165,8 @@ void data_sharing(int *matrix, int lines, int cols, int threads,
 }
 
 struct parse_data slice_matrix(int lines, int cols, int threads) {
-  // was said in the beginning of the code, this struct should be used
+  // was said in the beginning of the code,
+  // this struct should be used
   // to enter addresses to "balance data" on threads
   struct parse_data slice_data;
 
@@ -176,20 +177,15 @@ struct parse_data slice_matrix(int lines, int cols, int threads) {
   if (t_elements % threads) {
     // this values will be inserted on the last thread
     slice_data.remainder = t_elements - (floor(t_elements / threads) * threads);
-
-    // printf("slice_data.remainder: [%5d]", slice_data.remainder);
   }
 
   t_elements -= slice_data.remainder;
-  // printf("t_elements: [%5d]\n", t_elements);
 
   // the number that is the right multiplier
   slice_data.addr = t_elements / threads;
-  // printf("slice_data.addr: [%5d]\n", slice_data.addr);
 
   // getting the times that slice_data.addr must be multiplied
   slice_data.n_times = t_elements / slice_data.addr;
-  // printf("slice_data.n_times: [%5d]\n", slice_data.n_times);
 
   return slice_data;
 }
@@ -214,8 +210,10 @@ int find_pnum(int *matrix, int initial_addr, int last_addr) {
         break;
     }
 
-    if (n_div == 2)
+    if (n_div == 2) {
+      printf("(%d) [%8d]\n", actual_addr, matrix[actual_addr]);
       pnum_found++;
+    }
 
     actual_addr++;
   }
