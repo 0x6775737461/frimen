@@ -45,8 +45,8 @@ int main(void) {
 
   int lines, cols, threads;
 
-  lines = 100;
-  cols = 100;
+  lines = 50;
+  cols = 50;
   threads = 1;
 
   // indexing the initial/final address of each "slice"
@@ -66,14 +66,12 @@ int main(void) {
   int initial_addr = 0;
   int last_addr = 0;
 
-  for (int i = 0; i < (threads * 2); i++) {
+  for (int i = 0; i < (threads * 2); i += 2) {
 
     initial_addr = pair_addr[i];
     last_addr = pair_addr[i + 1];
 
     total_num_primes += find_pnum(matrix, initial_addr, last_addr);
-
-    i++;
   }
 
   printf("Total of Prime Numbers: [%5d]\n", total_num_primes);
