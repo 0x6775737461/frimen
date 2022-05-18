@@ -37,6 +37,9 @@ struct parse_data slice_matrix(int lines, int cols, int threads);
 // getting element address
 int offset(int line, int col, int t_cols);
 
+// finding the prime numbers
+int find_pnum(int *matrix, int initial_addr, int last_addr);
+
 int main(void) {
   srand(12345);
 
@@ -44,7 +47,7 @@ int main(void) {
 
   lines = 71;
   cols = 13;
-  threads = 5;
+  threads = 7;
 
   // indexing the initial/final address of each "slice"
   // of data to give to the thread
@@ -60,10 +63,20 @@ int main(void) {
   // and assigning the pair address
   data_sharing(matrix, lines, cols, threads, pair_addr);
 
+  int initial_addr = 0;
+  int last_addr = 0;
+
   for (int i = 0; i < (threads * 2); i++) {
-    printf("(%5d) - (%5d)\n", pair_addr[i], pair_addr[i + 1]);
+
+    initial_addr = pair_addr[i];
+    last_addr = pair_addr[i + 1];
+
+    total_num_primes += find_pnum(matrix, initial_addr, last_addr);
+
     i++;
   }
+
+  printf("Total of Prime Numbers: [%5d]\n", total_num_primes);
 
   free(matrix);
   free(pair_addr);
@@ -174,4 +187,33 @@ struct parse_data slice_matrix(int lines, int cols, int threads) {
   // printf("slice_data.n_times: [%5d]\n", slice_data.n_times);
 
   return slice_data;
+}
+
+int find_pnum(int *matrix, int initial_addr, int last_addr) {
+  // prime numbers found
+  int pnum_found = 0;
+
+  int actual_addr = initial_addr;
+
+  for (int i = actual_addr; i <= last_addr; i++) {
+    // number of divisors
+    int n_div = 0;
+
+    // TODO: change this to sound like a matrix
+    for (int j = 1; j <= matrix[actual_addr]; j++) {
+
+      if (matrix[actual_addr] % j == 0)
+        n_div++;
+
+      if (n_div > 2)
+        break;
+    }
+
+    if (n_div == 2)
+      pnum_found++;
+
+    actual_addr++;
+  }
+
+  return pnum_found;
 }
