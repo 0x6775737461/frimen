@@ -45,9 +45,9 @@ int main(void) {
 
   int lines, cols, threads;
 
-  lines = 80;
-  cols = 80;
-  threads = 7;
+  lines = 100;
+  cols = 100;
+  threads = 1;
 
   // indexing the initial/final address of each "slice"
   // of data to give to the thread
@@ -80,8 +80,8 @@ int main(void) {
 
   initial_time = clock() - initial_time;
 
-  printf("Time Elapsed: [%.2f] min\n",
-         (((double)initial_time) / CLOCKS_PER_SEC) / 60);
+  printf("Time Elapsed: %.2f sec\n",
+         ((double)initial_time) / CLOCKS_PER_SEC);
 
   free(matrix);
   free(pair_addr);
@@ -155,9 +155,6 @@ void data_sharing(int *matrix, int lines, int cols, int threads,
 
     j++;
 
-    // printf("thread[%d] - [%5d - %5d]\n",
-    //   i, initial_addr, final_addr);
-
     // the plus 1 is just to avoid the threads use
     // the same address
     initial_addr = final_addr + 1;
@@ -201,17 +198,17 @@ int find_pnum(int *matrix, int initial_addr, int last_addr) {
     int n_div = 0;
 
     // TODO: change this to sound like a matrix
-    for (int j = 1; j <= matrix[actual_addr]; j++) {
+    for (int j = 1; j <= matrix[actual_addr]; j += 2) {
+
+      if (matrix[actual_addr] % 2 == 0 || n_div > 2)
+        break;
 
       if (matrix[actual_addr] % j == 0)
         n_div++;
-
-      if (n_div > 2)
-        break;
     }
 
     if (n_div == 2) {
-      printf("(%d) [%8d]\n", actual_addr, matrix[actual_addr]);
+      printf("(%10d) [%8d]\n", actual_addr, matrix[actual_addr]);
       pnum_found++;
     }
 
