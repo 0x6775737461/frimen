@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_SIZE 99999999
 #define size_int sizeof(int)
@@ -41,6 +42,8 @@ int offset(int line, int col, int t_cols);
 int find_pnum(int *matrix, int initial_addr, int last_addr);
 
 int main(void) {
+  clock_t initial_time = clock();
+
   srand(12345);
 
   int lines, cols, threads;
@@ -77,6 +80,10 @@ int main(void) {
   }
 
   printf("Total of Prime Numbers: [%5d]\n", total_num_primes);
+
+  initial_time = clock() - initial_time;
+
+  printf("Time Elapsed: [%f]\n", ((double)initial_time) / CLOCKS_PER_SEC);
 
   free(matrix);
   free(pair_addr);
