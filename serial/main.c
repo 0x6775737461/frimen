@@ -5,11 +5,8 @@
 #include <time.h>
 
 #define MAX_SIZE 99999999
-#define size_int sizeof(int)
 
-#define valid_num ((rand()) % (MAX_SIZE))
-
-// this struct will be used in "colors" and "slice_matrix"
+// this struct will be used in "data_sharing" and "slice_matrix"
 // functions.
 struct parse_data {
   int addr;
@@ -21,7 +18,7 @@ struct parse_data {
 // local prime numbers in this global variable
 int total_num_primes = 0;
 
-// alloc the matrix dynamically
+// allocate matrix dynamically
 int *alloc_matrix(int lines, int cols);
 
 // fill the matrix with "random" data
@@ -83,7 +80,8 @@ int main(void) {
 
   initial_time = clock() - initial_time;
 
-  printf("Time Elapsed: [%f]\n", ((double)initial_time) / CLOCKS_PER_SEC);
+  printf("Time Elapsed: [%.2f] min\n",
+    (((double)initial_time) / CLOCKS_PER_SEC)) / 60;
 
   free(matrix);
   free(pair_addr);
@@ -110,7 +108,7 @@ void fill_matrix(int *matrix, int lines, int cols) {
   for (int i = 0; i < lines; i++) {
 
     for (int j = 0; j < cols; j++)
-      matrix[offset(i, j, cols)] = valid_num;
+      matrix[offset(i, j, cols)] = rand() % MAX_SIZE;
   }
 }
 
